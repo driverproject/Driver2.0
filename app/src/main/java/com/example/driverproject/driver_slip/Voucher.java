@@ -126,6 +126,7 @@ public class Voucher extends AppCompatActivity {
                 }
             }
         });*/
+
         //pdf
 
         Intent receive = getIntent();
