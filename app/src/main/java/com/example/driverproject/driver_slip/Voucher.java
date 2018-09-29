@@ -30,6 +30,8 @@ import android.app.ProgressDialog;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -37,6 +39,9 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 public class Voucher extends AppCompatActivity {
@@ -62,6 +67,7 @@ public class Voucher extends AppCompatActivity {
 
     FirebaseStorage storage;
     StorageReference storageReference;
+    String formattedDate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +81,10 @@ public class Voucher extends AppCompatActivity {
         String start_kms=bundle.getString("start");
         String end_kms=bundle.getString("end");
 
+        Date c = Calendar.getInstance().getTime();
+
+        SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+        formattedDate = df.format(c);
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
         int startkmsnum = Integer.parseInt(start_kms);
@@ -173,8 +183,8 @@ public class Voucher extends AppCompatActivity {
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Uploading...");
             progressDialog.show();
-
-            StorageReference ref = storageReference.child("images/" + UUID.randomUUID().toString());
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            StorageReference ref = storageReference.child("images/" + user.getUid().toString() + formattedDate + "/" + UUID.randomUUID().toString());
             ref.putFile(filePath)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
