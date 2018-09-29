@@ -36,4 +36,9 @@ public class Vehicle {
     public String getEnd_kms() {
         return end_kms;
     }
+
+    public String getUser_id() {
+        return user_id;
+    }
 }
+

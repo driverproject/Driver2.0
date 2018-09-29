@@ -24,7 +24,11 @@ public class Slip extends AppCompatActivity implements View.OnClickListener{
     EditText vehicle;
     DatabaseReference databaseVehicle;
     FirebaseAuth mauth;
-    private Calendar calender;
+    private Calendar calendar;
+
+    private int year;
+    private int month;
+    private int day;
 
 
     @Override
@@ -32,7 +36,11 @@ public class Slip extends AppCompatActivity implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slip);
 
-        long date = System.currentTimeMillis();
+
+        calendar = Calendar.getInstance();
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH) + 1;
+        day = calendar.get(Calendar.DAY_OF_MONTH);
 
     //hello
 
@@ -48,9 +56,7 @@ public class Slip extends AppCompatActivity implements View.OnClickListener{
 
         endkms=(EditText)findViewById(R.id.editTextKMSP);
 
-
-        SimpleDateFormat sdf = new SimpleDateFormat(" MM/dd/yyyy");
-        String dateString = sdf.format(date);
+        String dateString = day + "/" + month + "/" + year;
 
         date_entry.setText("Date:"+dateString);
 

@@ -34,20 +34,35 @@
         android:src="@drawable/grayplus"
         app:backgroundTint="@android:color/holo_green_light" />
 
-    <TextView
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        android:id="@+id/text_view_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
-        android:onClick="setDate"
-        android:text=""
-        android:textColor="@android:color/background_light"
-        android:textSize="18sp"
-        app:fontFamily="sans-serif-condensed" />
+        <TextView
 
+            android:id="@+id/text_view_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:padding="8dp"
+            android:onClick="setDate"
+            android:text="Today's Date"
+            android:textColor="@android:color/background_light"
+            android:textSize="18dp"
+            app:fontFamily="sans-serif-condensed" />
+
+
+    </android.support.v7.widget.CardView>
+
+    <ListView
+        android:id="@+id/list_view"
+        android:layout_below="@id/cardview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
 
 </RelativeLayout>
 
