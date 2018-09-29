@@ -1,8 +1,10 @@
 package com.example.driverproject.driver_slip;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,8 +12,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -36,8 +41,14 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -45,6 +56,13 @@ import java.util.Date;
 import java.util.UUID;
 
 public class Voucher extends AppCompatActivity {
+
+    public static final int REQUEST_PERM_WRITE_STORAGE = 102;
+    public static final int REQUEST_PERM_READ_STORAGE = 102;
+    EditText name;
+    //pdf
+    private Button pdfSave;
+    //pdf
 
     Toolbar toolbar;
     Button btn_get_sign, mClear, mGetSign, mCancel;
@@ -68,10 +86,47 @@ public class Voucher extends AppCompatActivity {
     FirebaseStorage storage;
     StorageReference storageReference;
     String formattedDate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voucher);
+
+        //pdf
+        /*pdfSave = (Button) findViewById(R.id.submitSlip);
+
+        pdfSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                        PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(Voucher.this,
+                            new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_PERM_WRITE_STORAGE);
+                }
+                else{
+                    createPDF();
+                    Intent i = new Intent(Voucher.this,EditProfileActivity.class);
+                    startActivity(i);
+                }
+            }
+        });
+
+        pdfopen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(Voucher.this, "Pressed2", Toast.LENGTH_SHORT).show();
+                if(ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                        PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(Voucher.this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},REQUEST_PERM_READ_STORAGE);
+                }
+                else{
+                    openPDF();
+                }
+            }
+        });*/
+        //pdf
 
         Intent receive = getIntent();
         Bundle bundle = receive.getExtras();
@@ -150,6 +205,15 @@ public class Voucher extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 uploadImage();
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                        PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(Voucher.this,
+                            new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERM_WRITE_STORAGE);
+                } else {
+                    createPDF();
+                    Intent i = new Intent(Voucher.this, EditProfileActivity.class);
+                    startActivity(i);
+                }
             }
         });
 
@@ -385,4 +449,102 @@ public class Voucher extends AppCompatActivity {
             dirtyRect.bottom = Math.max(lastTouchY, eventY);
         }
     }
+
+    //pdf
+    public void createPDF() {
+        Toast.makeText(this, "In!", Toast.LENGTH_SHORT).show();
+
+        Document doc = new Document();
+        try {
+            String path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/PDF";
+            //Toast.makeText(this, path, Toast.LENGTH_SHORT).show();
+            File dir = new File(path);
+            if (!dir.exists()) {
+                dir.mkdirs();
+
+                Log.d("PDFCreator", "PDF Path: " + path);
+
+                File file = new File(dir, "demo.pdf");
+                FileOutputStream fout = new FileOutputStream(file);
+
+                PdfWriter.getInstance(doc, fout);
+                doc.open();
+
+                //Toast.makeText(MainActivity.this, "Pressed", Toast.LENGTH_LONG).show();
+
+                Paragraph p1 = new Paragraph("Voucher No:");
+                Font paraFont = new Font();
+                paraFont.setStyle(Font.BOLD);
+                paraFont.setSize(16);
+                p1.setAlignment(Paragraph.ALIGN_LEFT);
+                p1.setFont(paraFont);
+                doc.add(p1);
+
+                Paragraph p2 = new Paragraph("Driver ID: ");
+                Font paraFont2 = new Font(Font.FontFamily.TIMES_ROMAN, Font.BOLD);
+                paraFont2.setColor(0, 0, 255);
+                p2.setAlignment(Paragraph.ALIGN_LEFT);
+                p2.setFont(paraFont2);
+                doc.add(p2);
+
+                int i = 10;
+                Paragraph p3 = new Paragraph("Starting Reading(Km): " + i);
+                Font paraFont3 = new Font();
+                paraFont3.setStyle(Font.BOLD);
+                paraFont3.setSize(16);
+                p3.setSpacingBefore(10);
+                p3.setAlignment(Paragraph.ALIGN_LEFT);
+                p3.setFont(paraFont3);
+                doc.add(p3);
+
+                Paragraph p4 = new Paragraph("Ending Reading: ");
+                Font paraFont4 = new Font();
+                paraFont4.setStyle(Font.BOLD);
+                paraFont4.setSize(16);
+                p4.setSpacingBefore(10);
+                p4.setAlignment(Paragraph.ALIGN_LEFT);
+                p4.setFont(paraFont4);
+                doc.add(p4);
+
+
+
+                /*ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                Bitmap bitmap = BitmapFactory.decodeResource(getBaseContext().getResources(),R.drawable.driver1);
+                bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+                Image myimg = Image.getInstance(stream.toByteArray());
+                myimg.setDpi(100,100);
+                myimg.setAlignment(Image.MIDDLE);
+
+                doc.add(myimg);
+
+                Phrase footertext = new Phrase("End");
+                //HeaderFooter pdFFooter = new HeaderFooter(footertext,false);
+                //doc.setFooter(pdFFooter);
+*/
+                Toast.makeText(this, "Created...", Toast.LENGTH_SHORT).show();
+            }
+        } catch (DocumentException de) {
+            // de.printStackTrace();
+            Log.e("PDFCreator", "Document Exception: " + de);
+        } catch (IOException ioe) {
+            //ioe.printStackTrace();
+            Log.e("PDFCreator", "IO Exception: " + ioe);
+        } finally {
+            doc.close();
+        }
+
+    }
+
+    public void openPDF() {
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/PDF";
+
+        File file = new File(path, "demo.pdf");
+
+        intent.setDataAndType(Uri.fromFile(file), "application/pdf");
+        startActivity(intent);
+
+    }
+    //pdf
 }
