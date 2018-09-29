@@ -24,6 +24,7 @@
         <activity android:name=".ProfileActivity" />
         <activity android:name=".EditProfileActivity" />
         <activity android:name=".Slip" />
+        
         <activity android:name=".Voucher"></activity>
     </application>
 
