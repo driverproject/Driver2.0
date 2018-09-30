@@ -64,6 +64,8 @@ public class Voucher extends AppCompatActivity {
     Bitmap b;
     //pdf
 
+    //pratik
+
     Toolbar toolbar;
     Button btn_get_sign, mClear, mGetSign, mCancel;
 
