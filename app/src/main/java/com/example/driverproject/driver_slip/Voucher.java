@@ -1,7 +1,7 @@
 package com.example.driverproject.driver_slip;
 
-import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,12 +12,12 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -31,7 +31,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.app.ProgressDialog;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -62,6 +61,7 @@ public class Voucher extends AppCompatActivity {
     EditText name;
     //pdf
     private Button pdfSave;
+    Bitmap b;
     //pdf
 
     Toolbar toolbar;
@@ -87,31 +87,19 @@ public class Voucher extends AppCompatActivity {
     StorageReference storageReference;
     String formattedDate;
 
+    String vehicle_Type;
+    String vehicle_Number;
+    String date_journey;
+    String start_kms;
+    String end_kms;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voucher);
 
-        //pdf
-        /*pdfSave = (Button) findViewById(R.id.submitSlip);
 
-        pdfSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if(ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                        PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(Voucher.this,
-                            new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_PERM_WRITE_STORAGE);
-                }
-                else{
-                    createPDF();
-                    Intent i = new Intent(Voucher.this,EditProfileActivity.class);
-                    startActivity(i);
-                }
-            }
-        });
-
+        /*
         pdfopen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -131,11 +119,11 @@ public class Voucher extends AppCompatActivity {
 
         Intent receive = getIntent();
         Bundle bundle = receive.getExtras();
-        String vehicle_Type=bundle.getString("VehicleType");
-        String vehicle_Number=bundle.getString("VehicleNumber");
-        String date_journey=bundle.getString("dateofjourney");
-        String start_kms=bundle.getString("start");
-        String end_kms=bundle.getString("end");
+        vehicle_Type = bundle.getString("VehicleType");
+        vehicle_Number = bundle.getString("VehicleNumber");
+        date_journey = bundle.getString("dateofjourney");
+        start_kms = bundle.getString("start");
+        end_kms = bundle.getString("end");
 
         Date c = Calendar.getInstance().getTime();
 
@@ -212,7 +200,7 @@ public class Voucher extends AppCompatActivity {
                             new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERM_WRITE_STORAGE);
                 } else {
                     createPDF();
-                    Intent i = new Intent(Voucher.this, EditProfileActivity.class);
+                    Intent i = new Intent(Voucher.this, ProfileActivity.class);
                     startActivity(i);
                 }
             }
@@ -301,7 +289,6 @@ public class Voucher extends AppCompatActivity {
 
             public void onClick(View v) {
 
-                Bitmap b;
                 Log.v("log_tag", "Panel Saved");
                 view.setDrawingCacheEnabled(true);
                 b = mSignature.save(view);
@@ -323,6 +310,90 @@ public class Voucher extends AppCompatActivity {
             }
         });
         dialog.show();
+    }
+
+    //pdf
+    public void createPDF() {
+        Toast.makeText(this, "In!", Toast.LENGTH_SHORT).show();
+
+        Document doc = new Document();
+        try {
+            String path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/PDF";
+            //Toast.makeText(this, path, Toast.LENGTH_SHORT).show();
+            File dir = new File(path);
+            if (!dir.exists()) {
+                dir.mkdirs();
+
+                Log.d("PDFCreator", "PDF Path: " + path);
+
+                File file = new File(dir, "demo.pdf");
+                FileOutputStream fout = new FileOutputStream(file);
+
+                PdfWriter.getInstance(doc, fout);
+                doc.open();
+
+                //Toast.makeText(MainActivity.this, "Pressed", Toast.LENGTH_LONG).show();
+
+                Paragraph p1 = new Paragraph("Vehicle Type:" + vehicle_Type);
+                Font paraFont = new Font();
+                paraFont.setSize(16);
+                p1.setAlignment(Paragraph.ALIGN_LEFT);
+                p1.setFont(paraFont);
+                doc.add(p1);
+
+                Paragraph p2 = new Paragraph("Vehicle No: " + vehicle_Number);
+                Font paraFont2 = new Font(Font.FontFamily.TIMES_ROMAN, Font.BOLD);
+                p2.setSpacingBefore(30);
+                paraFont2.setColor(0, 0, 255);
+                p2.setAlignment(Paragraph.ALIGN_LEFT);
+                p2.setFont(paraFont2);
+                doc.add(p2);
+
+                Paragraph p3 = new Paragraph("Starting Reading(Km): " + start_kms);
+                Font paraFont3 = new Font();
+                paraFont3.setStyle(Font.BOLD);
+                paraFont3.setSize(16);
+                p3.setSpacingBefore(10);
+                p3.setAlignment(Paragraph.ALIGN_LEFT);
+                p3.setFont(paraFont3);
+                doc.add(p3);
+
+                Paragraph p4 = new Paragraph("Ending Reading: " + end_kms);
+                Font paraFont4 = new Font();
+                paraFont4.setStyle(Font.BOLD);
+                paraFont4.setSize(16);
+                p4.setSpacingBefore(10);
+                p4.setAlignment(Paragraph.ALIGN_LEFT);
+                p4.setFont(paraFont4);
+                doc.add(p4);
+
+
+                /*Drawable drawable = new BitmapDrawable(getResources(), b);
+
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                Bitmap bitmap = BitmapFactory.decodeResource(getBaseContext().getResources(),drawable);
+                bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+                Image myimg = Image.getInstance(stream.toByteArray());
+                drawable.setDpi(100,100);
+                myimg.setAlignment(Image.MIDDLE);
+
+                doc.add(myimg);
+
+                Phrase footertext = new Phrase("End");*/
+                //HeaderFooter pdFFooter = new HeaderFooter(footertext,false);
+                //doc.setFooter(pdFFooter);
+                Toast.makeText(this, "Created...", Toast.LENGTH_SHORT).show();
+            }
+        } catch (DocumentException de) {
+            // de.printStackTrace();
+            Log.e("PDFCreator", "Document Exception: " + de);
+        } catch (IOException ioe) {
+            //ioe.printStackTrace();
+            Log.e("PDFCreator", "IO Exception: " + ioe);
+        } finally {
+            doc.close();
+        }
+
     }
 
     public class signature extends View {
@@ -354,7 +425,7 @@ public class Voucher extends AppCompatActivity {
             Canvas canvas = new Canvas(bitmap);
             try {
                 // Output the file
-                //FileOutputStream mFileOutStream = new FileOutputStream(StoredPath);
+                // FileOutputStream mFileOutStream = new FileOutputStream(StoredPath);
                 v.draw(canvas);
                 Toast.makeText(Voucher.this, "Passing Image", Toast.LENGTH_LONG).show();
                 // Convert the output file to Image such as .png
@@ -449,91 +520,6 @@ public class Voucher extends AppCompatActivity {
             dirtyRect.top = Math.min(lastTouchY, eventY);
             dirtyRect.bottom = Math.max(lastTouchY, eventY);
         }
-    }
-
-    //pdf
-    public void createPDF() {
-        Toast.makeText(this, "In!", Toast.LENGTH_SHORT).show();
-
-        Document doc = new Document();
-        try {
-            String path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/PDF";
-            //Toast.makeText(this, path, Toast.LENGTH_SHORT).show();
-            File dir = new File(path);
-            if (!dir.exists()) {
-                dir.mkdirs();
-
-                Log.d("PDFCreator", "PDF Path: " + path);
-
-                File file = new File(dir, "demo.pdf");
-                FileOutputStream fout = new FileOutputStream(file);
-
-                PdfWriter.getInstance(doc, fout);
-                doc.open();
-
-                //Toast.makeText(MainActivity.this, "Pressed", Toast.LENGTH_LONG).show();
-
-                Paragraph p1 = new Paragraph("Voucher No:");
-                Font paraFont = new Font();
-                paraFont.setStyle(Font.BOLD);
-                paraFont.setSize(16);
-                p1.setAlignment(Paragraph.ALIGN_LEFT);
-                p1.setFont(paraFont);
-                doc.add(p1);
-
-                Paragraph p2 = new Paragraph("Driver ID: ");
-                Font paraFont2 = new Font(Font.FontFamily.TIMES_ROMAN, Font.BOLD);
-                paraFont2.setColor(0, 0, 255);
-                p2.setAlignment(Paragraph.ALIGN_LEFT);
-                p2.setFont(paraFont2);
-                doc.add(p2);
-
-                int i = 10;
-                Paragraph p3 = new Paragraph("Starting Reading(Km): " + i);
-                Font paraFont3 = new Font();
-                paraFont3.setStyle(Font.BOLD);
-                paraFont3.setSize(16);
-                p3.setSpacingBefore(10);
-                p3.setAlignment(Paragraph.ALIGN_LEFT);
-                p3.setFont(paraFont3);
-                doc.add(p3);
-
-                Paragraph p4 = new Paragraph("Ending Reading: ");
-                Font paraFont4 = new Font();
-                paraFont4.setStyle(Font.BOLD);
-                paraFont4.setSize(16);
-                p4.setSpacingBefore(10);
-                p4.setAlignment(Paragraph.ALIGN_LEFT);
-                p4.setFont(paraFont4);
-                doc.add(p4);
-
-
-
-                /*ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                Bitmap bitmap = BitmapFactory.decodeResource(getBaseContext().getResources(),R.drawable.driver1);
-                bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
-                Image myimg = Image.getInstance(stream.toByteArray());
-                myimg.setDpi(100,100);
-                myimg.setAlignment(Image.MIDDLE);
-
-                doc.add(myimg);
-
-                Phrase footertext = new Phrase("End");
-                //HeaderFooter pdFFooter = new HeaderFooter(footertext,false);
-                //doc.setFooter(pdFFooter);
-*/
-                Toast.makeText(this, "Created...", Toast.LENGTH_SHORT).show();
-            }
-        } catch (DocumentException de) {
-            // de.printStackTrace();
-            Log.e("PDFCreator", "Document Exception: " + de);
-        } catch (IOException ioe) {
-            //ioe.printStackTrace();
-            Log.e("PDFCreator", "IO Exception: " + ioe);
-        } finally {
-            doc.close();
-        }
-
     }
 
     public void openPDF() {
